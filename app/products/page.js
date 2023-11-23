@@ -1,8 +1,15 @@
 "use client";
 import { Button } from "@material-tailwind/react";
 import React from "react";
+import AnalysisCard from "../components/Sheard/AnalysisCard/AnalysisCard";
+import { AllProducts } from "../components/ProductInfo/AllProducts/AllProducts";
+import { CreateProduct } from "../components/ProductInfo/CreateProduct/CreateProduct";
 
 const addproduct = () => {
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => setOpen(!open);
+
   return (
     <div className="text-white px-4 pt-4 ">
       <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
@@ -14,7 +21,12 @@ const addproduct = () => {
         </div>
         <div className="flex md:justify-end justify-start">
           <div>
-            <Button color="blue" size="sm" className="flex items-center gap-2">
+            <Button
+              onClick={handleOpen}
+              color="blue"
+              size="sm"
+              className="flex items-center gap-2"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -35,6 +47,9 @@ const addproduct = () => {
         </div>
       </div>
       {/* Seceond section  */}
+      <AnalysisCard />
+      <AllProducts />
+      <CreateProduct handleOpen={handleOpen} open={open} />
     </div>
   );
 };
