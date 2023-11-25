@@ -45,33 +45,17 @@ export function CreateProduct({ handleOpen, open }) {
   const onSubmit = async (data) => {
     try {
       // It's single data
-      // const images = data.images[0];
-      // const formData = new FormData();
-      // formData.append("image", images);
-
-      const images = data.images;
+      const images = data.images[0];
       const formData = new FormData();
-      for (const image of images) {
-        formData.append("img", image);
-      }
-
-      // const formData = new FormData();
-      // for (const image of images) {
-      //   formData.append("images", image);
-      // }
-      // formData.append("image", images);
+      formData.append("image", images);
 
       const response = await axios.post(
         "https://api.imgbb.com/1/upload?expiration=600&key=cf0d99684ecdf3c7dd5fdfda9db29f4f",
         formData
       );
 
-      // // Assuming ImgBB API response structure is { data: { url } }
-      // const imageUrls = response.data.data.images.map((image) => image.url);
-      // console.log("Images uploaded successfully!", imageUrls);
-
       console.log(images);
-      console.log(store);
+      console.log(response);
     } catch (error) {
       console.error("Error uploading images:", error);
     }

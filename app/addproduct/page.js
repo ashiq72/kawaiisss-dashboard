@@ -15,11 +15,8 @@ const UploadForm = ({ onUpload }) => {
 
     // Convert FileList to an array
     const filesArray = Array.from(selectedImages);
+
     // Use FormData to send files
-    // const formData = new FormData();
-    // filesArray.forEach((image, index) => {
-    //   formData.append(`image_`, image);
-    // });
     const list = [];
     const formData = new FormData();
     for (let i = 0; i < selectedImages.length; i++) {
