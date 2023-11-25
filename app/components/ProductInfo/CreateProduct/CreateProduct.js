@@ -1,5 +1,7 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import { useForm } from "react-hook-form";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import {
   Button,
@@ -18,6 +20,63 @@ import {
 import { FaLongArrowAltRight } from "react-icons/fa";
 
 export function CreateProduct({ handleOpen, open }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    getValues,
+  } = useForm();
+  const options = ["XS", "S", "M", "L", "XL"];
+  const status = ["in-stock", "out-of-stock"];
+
+  const [selectedOptions, setSelectedOptions] = useState([]);
+
+  const handleCheckboxChange = (option) => {
+    if (selectedOptions.includes(option)) {
+      // If the option is already selected, remove it
+      setSelectedOptions(selectedOptions.filter((item) => item !== option));
+    } else {
+      // If the option is not selected, add it
+      setSelectedOptions([...selectedOptions, option]);
+    }
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      // It's single data
+      // const images = data.images[0];
+      // const formData = new FormData();
+      // formData.append("image", images);
+
+      const images = data.images;
+      const formData = new FormData();
+      for (const image of images) {
+        formData.append("img", image);
+      }
+
+      // const formData = new FormData();
+      // for (const image of images) {
+      //   formData.append("images", image);
+      // }
+      // formData.append("image", images);
+
+      const response = await axios.post(
+        "https://api.imgbb.com/1/upload?expiration=600&key=cf0d99684ecdf3c7dd5fdfda9db29f4f",
+        formData
+      );
+
+      // // Assuming ImgBB API response structure is { data: { url } }
+      // const imageUrls = response.data.data.images.map((image) => image.url);
+      // console.log("Images uploaded successfully!", imageUrls);
+
+      console.log(images);
+      console.log(store);
+    } catch (error) {
+      console.error("Error uploading images:", error);
+    }
+  };
+
   return (
     <>
       <Dialog
@@ -27,13 +86,20 @@ export function CreateProduct({ handleOpen, open }) {
       >
         <DialogHeader className="text-gray-300">Create a product</DialogHeader>
         <DialogBody className="h-[42rem] overflow-y-auto scrollable-element">
-          <form className="text-gray-300">
-            <Input
-              success
-              color="white"
-              label="Product name*"
-              className="text-white"
-            />
+          <form onSubmit={handleSubmit(onSubmit)} className="text-gray-300">
+            {/*--------------- Name ------------ */}
+            <div>
+              <Input
+                {...register("name", {
+                  required: "Name is required",
+                })}
+                success
+                color="white"
+                label="Product name*"
+                className="text-white"
+              />
+            </div>
+            {/*-- Orginal Price & Discount Price -- */}
             <div className="my-4 flex items-center gap-4">
               <div>
                 <Typography
@@ -44,6 +110,7 @@ export function CreateProduct({ handleOpen, open }) {
                   Orginal Price*
                 </Typography>
                 <Input
+                  {...register("orginalPrice")}
                   success
                   maxLength={5}
                   type="number"
@@ -62,6 +129,7 @@ export function CreateProduct({ handleOpen, open }) {
                   Discount Price (optional)
                 </Typography>
                 <Input
+                  {...register("discountPrice")}
                   success
                   type="number"
                   className=" !border-t-blue-gray-200 focus:!border-t-gray-500 text-white"
@@ -71,7 +139,16 @@ export function CreateProduct({ handleOpen, open }) {
                 />
               </div>
             </div>
-            <Textarea className="text-white" label="Description*" success />
+            {/*------------ Description ----------- */}
+            <div>
+              <Textarea
+                {...register("description")}
+                className="text-white"
+                label="Description*"
+                success
+              />
+            </div>
+            {/*--------------- Size ------------ */}
             <div>
               <Typography
                 variant="small"
@@ -81,41 +158,115 @@ export function CreateProduct({ handleOpen, open }) {
                 Size*
               </Typography>
               <div className="flex w-max gap-4">
-                <span className="flex items-center">
-                  <Checkbox color="indigo" defaultChecked />
-                  <h1 className="">XS</h1>
-                </span>
-                <span className="flex items-center">
-                  <Checkbox color="indigo" defaultChecked />
-                  <h1 className="">S</h1>
-                </span>
-                <span className="flex items-center">
-                  <Checkbox color="indigo" defaultChecked />
-                  <h1 className="">M</h1>
-                </span>
-                <span className="flex items-center">
-                  <Checkbox color="indigo" defaultChecked />
-                  <h1 className="">L</h1>
-                </span>
-                <span className="flex items-center">
-                  <Checkbox color="indigo" defaultChecked />
-                  <h1 className="">XL</h1>
-                </span>
+                {options.map((option) => (
+                  <label className="flex items-center gap-2" key={option}>
+                    <input
+                      {...register("size")}
+                      type="checkbox"
+                      value={option}
+                      checked={selectedOptions.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                    {option}
+                  </label>
+                ))}
               </div>
+            </div>
+            {/*-------------- Category ----------- */}
+            <div>
+              <Typography
+                variant="small"
+                color="blue"
+                className="py-2 font-medium text-green-500"
+              >
+                Category*
+              </Typography>
+              <select
+                {...register("yourSelectFieldName")}
+                className="bg-black max-w-xs w-full py-2 px-2"
+              >
+                <option disabled className="">
+                  Women{" > "}Tops
+                </option>
+                <option>Tops</option>
+                <option>Shirts</option>
+                <option>T-shirt</option>
+                <option>Cardigans</option>
+                <option>Crop Top</option>
+                <option>Vest</option>
+                <option>Tank Tops</option>
+                <option>Tank Tops</option>
+                <option>Sweaters & Knits</option>
+                <option>Half shirt</option>
+                <option disabled className="">
+                  Women{" > "}Bottoms
+                </option>
+                <option>Skirt</option>
+                <option>Short skirt</option>
+                <option>Formal</option>
+                <option>Boyfriend</option>
+                <option>Shorts</option>
+                <option>Wide leg</option>
+                <option>Mom</option>
+                <option>Skinny</option>
+                <option>Jeggings</option>
+                <option>Ripped</option>
+                <option>Baggy</option>
+                <option disabled className="">
+                  Women{" > "}Dress
+                </option>
+                <option>Long Frock</option>
+                <option>Short Frock</option>
+                <option>Short frock</option>
+                <option>Gown</option>
+                <option>Beach dress</option>
+                <option>Midi dress</option>
+                <option disabled className="">
+                  Man
+                </option>
+                <option>Man</option>
+                <option disabled className="">
+                  Kids
+                </option>
+                <option>Dress</option>
+                <option>Accessories</option>
+                <option>Toys</option>
+                <option disabled className="">
+                  Home & Decor
+                </option>
+                <option>Wall Decor</option>
+                <option>Plants Tob</option>
+                <option disabled className="">
+                  Accessories
+                </option>
+                <option>Watch</option>
+                <option>Jewellery</option>
+                <option>Hat</option>
+                <option disabled className="">
+                  Shoes
+                </option>
+                <option>Shoes</option>
+                <option disabled className="">
+                  Bags
+                </option>
+                <option>Bags</option>
+              </select>
             </div>
 
             <div className="w-72 pt-12 pb-2">
-              <Select
+              {/* <Select
+                {...register("category")}
                 label="Category"
                 className="text-white"
+                name="selectOption"
                 success
                 animate={{
                   mount: { y: 0 },
                   unmount: { y: 25 },
                 }}
-              >
-                {/* Women -> Tops */}
-                <label className="my-2 font-semibold flex items-center gap-2">
+              > */}
+              {/* Women -> Tops */}
+              {/* <label className="my-2 font-semibold flex items-center gap-2">
                   <span>Women</span>
                   <span>
                     <FaLongArrowAltRight />
@@ -131,9 +282,9 @@ export function CreateProduct({ handleOpen, open }) {
                 <Option>Tank Tops</Option>
                 <Option>Tank Tops</Option>
                 <Option>Sweaters & Knits</Option>
-                <Option>Half shirt</Option>
-                {/* Women -> Tops */}
-                <label className="my-2 font-semibold flex items-center gap-2">
+                <Option>Half shirt</Option> */}
+              {/* Women -> Tops */}
+              {/* <label className="my-2 font-semibold flex items-center gap-2">
                   <span>Women</span>
                   <span>
                     <FaLongArrowAltRight />
@@ -150,9 +301,9 @@ export function CreateProduct({ handleOpen, open }) {
                 <Option>Skinny</Option>
                 <Option>Jeggings</Option>
                 <Option>Ripped</Option>
-                <Option>Baggy</Option>
-                {/* Women -> Tops */}
-                <label className="my-2 font-semibold flex items-center gap-2">
+                <Option>Baggy</Option> */}
+              {/* Women -> Tops */}
+              {/* <label className="my-2 font-semibold flex items-center gap-2">
                   <span>Women</span>
                   <span>
                     <FaLongArrowAltRight />
@@ -164,44 +315,45 @@ export function CreateProduct({ handleOpen, open }) {
                 <Option>Short frock</Option>
                 <Option>Gown</Option>
                 <Option>Beach dress</Option>
-                <Option>Midi dress</Option>
-                {/* man */}
-                <label className="my-2 font-semibold">
+                <Option>Midi dress</Option> */}
+              {/* man */}
+              {/* <label className="my-2 font-semibold">
                   <span>Man</span>
                 </label>
-                <Option>Man</Option>
-                {/* kids */}
-                <label className="my-2 font-semibold">
-                  <span>Man</span>
+                <Option>Man</Option> */}
+              {/* kids */}
+              {/* <label className="my-2 font-semibold">
+                  <span>kids</span>
                 </label>
                 <Option>Dress</Option>
                 <Option>Accessories</Option>
-                <Option>Toys</Option>
-                {/* Home & Decor */}
-                <label className="my-2 font-semibold">
+                <Option>Toys</Option> */}
+              {/* Home & Decor */}
+              {/* <label className="my-2 font-semibold">
                   <span>Home & Decor</span>
                 </label>
                 <Option>Wall Decor</Option>
-                <Option>Plants Tob</Option>
-                {/* Accessories */}
-                <label className="my-2 font-semibold">
+                <Option>Plants Tob</Option> */}
+              {/* Accessories */}
+              {/* <label className="my-2 font-semibold">
                   <span>Accessories</span>
                 </label>
                 <Option>Watch</Option>
                 <Option>Jewellery</Option>
-                <Option>Hat</Option>
-                {/* Shoes */}
-                <label className="my-2 font-semibold">
+                <Option>Hat</Option> */}
+              {/* Shoes */}
+              {/* <label className="my-2 font-semibold">
                   <span>Shoes</span>
                 </label>
-                <Option>Shoes</Option>
-                {/* Bags */}
-                <label className="py-2 font-semibold">
+                <Option>Shoes</Option> */}
+              {/* Bags */}
+              {/* <label className="py-2 font-semibold">
                   <span>Bags</span>
                 </label>
-                <Option>Bags</Option>
-              </Select>
+                <Option>Bags</Option> */}
+              {/* </Select> */}
             </div>
+            {/*-------------- Status ----------- */}
             <div className="pt-4">
               <Typography
                 variant="small"
@@ -211,8 +363,20 @@ export function CreateProduct({ handleOpen, open }) {
                 Status*
               </Typography>
               <div className="flex gap-10">
-                <Radio
+                {status.map((option) => (
+                  <label key={option} className="flex gap-2">
+                    <input
+                      type="radio"
+                      {...register("status")}
+                      value={option}
+                    />
+                    {/* <Radio name="type" color="blue" label={option} /> */}
+                    {option}
+                  </label>
+                ))}
+                {/* <Radio
                   name="type"
+                  {...register("status")}
                   color="blue"
                   label={
                     <Typography
@@ -228,6 +392,7 @@ export function CreateProduct({ handleOpen, open }) {
                 <Radio
                   name="type"
                   color="blue"
+                  {...register("status")}
                   label={
                     <Typography
                       as="a"
@@ -240,9 +405,10 @@ export function CreateProduct({ handleOpen, open }) {
                   }
                   className="text-white"
                   defaultChecked
-                />
+                /> */}
               </div>
             </div>
+            {/*-------------- Photo -------------- */}
             <div className="col-span-full pt-4">
               <Typography
                 variant="small"
@@ -262,12 +428,11 @@ export function CreateProduct({ handleOpen, open }) {
                       htmlFor="file-upload"
                       className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
                     >
-                      <span>Upload a file</span>
                       <input
-                        id="file-upload"
-                        name="file-upload"
+                        multiple
+                        {...register("images")}
                         type="file"
-                        className="sr-only"
+                        className="bg-gray-800 text-white rounded"
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
@@ -278,21 +443,27 @@ export function CreateProduct({ handleOpen, open }) {
                 </div>
               </div>
             </div>
+            {/* Butoon */}
+            <DialogFooter className="space-x-2">
+              <Button
+                onClick={handleOpen}
+                variant="outlined"
+                size="sm"
+                className="text-white border-white"
+              >
+                cancel
+              </Button>
+              <Button
+                variant="gradient"
+                color="blue"
+                onClick={handleOpen}
+                type="submit"
+              >
+                Save
+              </Button>
+            </DialogFooter>
           </form>
         </DialogBody>
-        <DialogFooter className="space-x-2">
-          <Button
-            onClick={handleOpen}
-            variant="outlined"
-            size="sm"
-            className="text-white border-white"
-          >
-            cancel
-          </Button>
-          <Button variant="gradient" color="blue" onClick={handleOpen}>
-            Save
-          </Button>
-        </DialogFooter>
       </Dialog>
     </>
   );
